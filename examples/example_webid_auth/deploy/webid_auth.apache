@@ -1,0 +1,33 @@
+<VirtualHost *:80>
+        ServerName example.org
+	RewriteEngine On
+	RewriteCond %{HTTPS} off
+	RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+        ErrorLog /srv/www/example.org/var/log/error.log
+        LogLevel warn
+        CustomLog /srv/www/example.org/var/log/access.log combined
+</VirtualHost>
+
+<VirtualHost *:443>
+        ServerName example.org
+        WSGIDaemonProcess django_example.org user=www-data group=www-data threads=10 python-path=/srv/www/example.org/venv/lib/python2.7/site-packages
+        WSGIProcessGroup django_example.org
+        WSGIScriptAlias / /srv/www/example.org/django-webid-auth/examples/example/_webid_auth/deploy/example_webid_auth.wsgi
+        <Directory /srv/www/example.org/django-webid-auth/example_webid_auth/deploy>
+            Order deny,allow
+            Allow from all
+        </Directory>
+
+	SSLEngine On
+	SSLCertificateFile /etc/apache2/ssl/example.org.pem
+
+	<Location />
+   		SSLVerifyClient optional_no_ca
+   		SSLVerifyDepth 1
+		SSLOptions +ExportCertData
+	</Location>
+        ErrorLog /srv/www/example.org/var/log/error.log
+        LogLevel debug
+        CustomLog /srv/www/example.org/var/log/access.log combined
+</VirtualHost>
+

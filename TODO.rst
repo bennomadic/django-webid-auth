@@ -1,0 +1,4 @@
+- Write user generation callbacks
+- Document settings values (for callbacks, exception handling, auth mode)
+- Write testsuite!
+- Set CI server.

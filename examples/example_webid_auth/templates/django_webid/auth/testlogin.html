@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block header %}
+<h1>Congrats!</h1>
+{% endblock %}
+{% block content %}
+If you are reading this, you are already logged in
+as user <b>{{ user.username }}</b>
+<br/>
+<p><b>request webidinfo</b>: {{ webidinfo.validatedURI }}</p>
+<script type="text/javascript">
+function logout(elem) {
+   if (document.all == null) {
+      if (window.crypto) {
+          try{
+              window.crypto.logout();
+              return false; //firefox ok -- no need to follow the link
+          } catch (err) {//Safari, Opera, Chrome -- try with tis session breaking
+          }
+      } else { //also try with session breaking
+      }
+   } else { // MSIE 6+
+      document.execCommand('ClearAuthenticationCache');
+      return false;
+   };
+   return true
+}
+
+function login(elem)  { logout(elem) }
+</script>
+<a href="/logout" onclick="return logout();">logout</a>
+<br/>
+<style>
+pre {
+   display: block;
+   margin: 2em 0;
+   white-space: pre;
+   overflow: auto;
+   width: 470px;
+   line-height: 1.4;
+   border: 1px solid #ccc;
+   background: #ece9d8;
+   padding: 8px;
+}
+
+.passed {
+   color: green;
+}
+
+.failed {
+   color: red;
+}
+
+.warning {
+   color: purple;
+   font-weight:bold;
+}
+
+.req {
+   font-size:120%;
+}
+
+.case {
+   padding-left:50px;
+}
+
+</style>
+
+{% for test in webidinfo.testbed.tests %}
+
+{% for result in test.results %}
+
+<div><b class="{% if test.requirement %}req{% else %}case{% endif %}">{{ test.name }}</b> ... <b class="{% if result.passed %}passed{% else %}failed{% endif %}">{% if result.passed %}Passed{% else %}Failed{% endif %}</b>
+	{% if result.details %}<p {% if not test.requirement %}class="case"{% endif %}>verification timestamp: {{ result.details }}</p>{% endif %}
+	<p {% if not test.requirement %}class="case"{% endif %}>{% if not test.mandatory and not result.passed %}<span class="warning">WARNING </span>{% endif %}{{ test.description }}</p>
+</div>
+
+{% endfor %}
+{% endfor %}
+<a href="/test/WebIDTest">RDF report</a>
+{% endblock %}
