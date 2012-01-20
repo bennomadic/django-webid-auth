@@ -1,1 +1,1 @@
-recursive-include src/django_webid/provider/templates *
+#recursive-include src/django_webid/auth/templates *
