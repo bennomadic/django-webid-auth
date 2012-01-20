@@ -9,11 +9,16 @@ from django.conf import settings
 
 sys.stdout = sys.stderr
 
-sys.path.insert(0, abspath(join(dirname(__file__), "../../../")))
-sys.path.insert(0, abspath(join(dirname(__file__), "../../")))
+venvpath = "/srv/www/django/webidauth/django-webid-auth/lib/python2.7/site-packages"
+projpath = abspath(os.path.join(os.path.dirname(__file__), "../../"))
 
+if venvpath not in sys.path:
+    sys.path.append(venvpath)
 
-print sys.path
+if projpath not in sys.path:
+    sys.path.append(projpath)
+
+print('wsgi path=======', sys.path)
 
 os.environ["DJANGO_SETTINGS_MODULE"] = "example_webid_auth.settings"
 
