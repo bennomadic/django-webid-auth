@@ -2,16 +2,21 @@ import logging
 import re
 
 from django.db import transaction
+from django.conf import settings
 from django.contrib.auth.models import UserManager
 
 from util import settings_get
 
 from webid.validator import WebIDValidator
 #XXX problems with this import???!
-from django_webid.provider.models import *
 
+logger = logging.getLogger(name=__name__)
 
-logger = logging.getLogger()
+if settings.DEBUG:
+    logger.setLevel(logging.DEBUG)
+
+logger.error('trying to import WebID model')
+from django_webid.provider import models
 
 
 class WEBIDAuthBackend:
@@ -25,7 +30,7 @@ class WEBIDAuthBackend:
     def authenticate(self, request=None):
         logger.error('AUTHENTICATING:  ')
         ssl_info = request.ssl_info
-        logger.debug('ssl_info.cert', ssl_info.cert)
+        logger.debug('ssl_info.cert %s' % ssl_info.cert)
         certstr = ssl_info.__dict__.get('cert', None)
         logger.error('certstr= %s' % certstr)
         validator = WebIDValidator(certstr=certstr)
@@ -60,10 +65,10 @@ class WEBIDAuthBackend:
         #make sure that uri does not exists
         try:
             logger.debug('>>>>>>>>>> getting user by uri = %s' % user_uri)
-            user = WebIDUser.objects.get(uri=str(user_uri))
+            user = models.WebIDUser.get_for_uri(user_uri)
             logger.debug('user is %s' % user)
             return user
-        except WebIDUser.DoesNotExist:
+        except models.WebIDUser.DoesNotExist:
             logger.debug('>>>>>>>>>> that user doesnot exists :(')
             return None
 
@@ -73,8 +78,8 @@ class WEBIDAuthBackend:
         certificate once, when loggin in
         """
         try:
-            return WebIDUser.objects.get(id=user_id)
-        except WebIDUser.DoesNotExist:
+            return models.WebIDUser.objects.get(id=user_id)
+        except models.WebIDUser.DoesNotExist:
             return None
 
     @transaction.commit_on_success
@@ -105,7 +110,7 @@ class WEBIDAuthBackend:
         WEBIDAUTH_CREATE_USER_CALLBACK setting.
         """
         logger.debug('>>>>>>>>>>>>>>building user!')
-        user = WebIDUser()
+        user = models.WebIDUser()
         data = request.webidinfo
         names = data.webid_name
 
@@ -132,7 +137,7 @@ class WEBIDAuthBackend:
             print 'target_name', target_name
             print 'try', max_tries - tries
             #XXX build kwargs dict, instead of hardcoding name
-            colliding_users = WebIDUser.objects.all().\
+            colliding_users = models.WebIDUser.objects.all().\
                     filter(username=target_name)
             #print 'colliding ', colliding_users
             #print colliding_users.count()
