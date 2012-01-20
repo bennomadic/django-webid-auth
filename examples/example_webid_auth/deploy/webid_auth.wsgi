@@ -18,7 +18,7 @@ if venvpath not in sys.path:
 if projpath not in sys.path:
     sys.path.append(projpath)
 
-print('wsgi path=======', sys.path)
+#print('wsgi path=======', sys.path)
 
 os.environ["DJANGO_SETTINGS_MODULE"] = "example_webid_auth.settings"
 
