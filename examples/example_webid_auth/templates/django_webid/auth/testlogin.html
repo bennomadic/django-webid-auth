@@ -5,11 +5,16 @@
 {% block content %}
 <div class="notecard">
 {% if not user.is_anonymous %}
+<div class="foafpic happy">
+</div>
 <p>Congrats! You are logged in as user <b>{{ user.username }}</b></p>
 {% else %}
+<div class="foafpic sad">
+</div>
 <p>Hmmm... WebID auth failed :(</p>
 {% endif %}
-<p><b>request webidinfo</b>: {{ webidinfo.validatedURI }}</p>
+<p><b>You just {% if not user.is_anonymous %}logged{% else %}tried to log{% endif %} in with this WebID URI:</b></p>
+<p>{{ webidinfo.validatedURI }}</p>
 </div>
 <style>
 pre {
@@ -52,11 +57,38 @@ pre {
    padding: 10px;
    border-radius: 5px;
    border: solid 2px black;
+   height: 120px;
+}
+
+.sad {
+   background: url({{ STATIC_URL}}django_webid/auth/images/foaflogo_sad.png) no-repeat;
+}
+.happy {
+   background: url({{STATIC_URL}}django_webid/auth/images/foaflogo_happy.png) no-repeat;
+}
+.foafpic {
+   height:110px;
+   width: 200px;
+   margin-right: 20px;
+   padding-bottom: 20px;
+   float:right;
 }
 
 </style>
 <br/>
+{% if not user.is_anonymous %}
+<h2>Now what?</h2>
+<p>If you're wondering what else can you do with your brand-new <a href="http://webid.info/spec"><b>WebID</b></a>...not much on this site. It was only a litte demo of a little bit of magic. You have to wait for the <a href="">WebID community</a> to deliver some more awesomeness to you... stay tuned!</p>
+<h2>A django developer there?</h2>
+<p>Use <b>django-webid-auth</b> on your project. Fork this code on github.</p>
+{% else %}
+<h2>What happened here?</h2>
+<p>This endpoint <em><b>thinks</b></em> that your WebID credentials do not match the <a href="http://webid.info/spec">current spec</a>. It might be an error on your side, or also might be an error on this endpoint specification, which is still not very well tested. You can file issues <a href="https://github.com/bennomadic/python-webid/issues">here</a>, our tls-fairies will look at it asap.</p>
+<p>The following report of the validation process might be helpful to debug.<p>
+{% endif %}
+<hr/>
 <h1>WebID login report</h1>
+<p>If you are rolling your own WebID, below you can find some hints about the validation progress. We're using <a href="https://github.com/bennomadic/python-webid/blob/master/src/webid/validator.py">this python-based validator</a>. Bugs? Issues? Need help? <a href="https://github.com/bennomadic/python-webid/issues">Tell us!</a></p>
 <p>(And see here for a machine-readable <a href="/test/WebIDTest">earl report</a>).</p>
 
 {% for test in webidinfo.testbed.tests %}

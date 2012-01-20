@@ -6,7 +6,11 @@
 {% endif %}
 {% endcomment %}
 
+{% if not user.is_anonymous %}
 <a href="/logout" onclick="return logout();">logout</a>
+{% else %}
+Hi, anonymous. We are legion.
+{% endif %}
 
 <script type="text/javascript">
 function logout(elem) {

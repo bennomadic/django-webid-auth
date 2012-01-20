@@ -4,7 +4,9 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 
 
-@login_required
+#@login_required
+#XXX is this decodator working as expected?
+#I think we need a webidlogin_required...
 def test_login(request):
     return render_to_response('django_webid/auth/testlogin.html', {
         'user': request.user,
