@@ -1,12 +1,16 @@
 from django.shortcuts import render, render_to_response  # get_object_or_404
 from django.contrib.auth.decorators import login_required
 
+from django.conf import settings
+
 
 @login_required
 def test_login(request):
     return render_to_response('django_webid/auth/testlogin.html', {
         'user': request.user,
-        'webidinfo': request.webidinfo
+        'webidinfo': request.webidinfo,
+        'STATIC_URL': settings.STATIC_URL,
+        'MEDIA_URL': settings.MEDIA_URL,
         })
 
 
