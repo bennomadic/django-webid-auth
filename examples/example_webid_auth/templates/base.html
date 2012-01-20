@@ -1,13 +1,10 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
-<head>
-    <title>{% block title %}Mycelia Demo{% endblock %}</title>
-    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-</head>
+{% extends "django_webid/auth/site_base.html" %}
 
-<body>
-    {% block header %}{% endblock %}
-    {% block content %}{% endblock %}
-</body>
-</html>
+{% load i18n %}
+
+
+{% block rtab_id %}id="webid_tab"{% endblock %}
+
+{% block subnav %}
+{% endblock %}
+

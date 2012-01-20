@@ -3,32 +3,14 @@
 <h1>Congrats!</h1>
 {% endblock %}
 {% block content %}
-If you are reading this, you are already logged in
-as user <b>{{ user.username }}</b>
-<br/>
+<div class="notecard">
+{% if not user.is_anonymous %}
+<p>Congrats! You are logged in as user <b>{{ user.username }}</b></p>
+{% else %}
+<p>Hmmm... WebID auth failed :(</p>
+{% endif %}
 <p><b>request webidinfo</b>: {{ webidinfo.validatedURI }}</p>
-<script type="text/javascript">
-function logout(elem) {
-   if (document.all == null) {
-      if (window.crypto) {
-          try{
-              window.crypto.logout();
-              return false; //firefox ok -- no need to follow the link
-          } catch (err) {//Safari, Opera, Chrome -- try with tis session breaking
-          }
-      } else { //also try with session breaking
-      }
-   } else { // MSIE 6+
-      document.execCommand('ClearAuthenticationCache');
-      return false;
-   };
-   return true
-}
-
-function login(elem)  { logout(elem) }
-</script>
-<a href="/logout" onclick="return logout();">logout</a>
-<br/>
+</div>
 <style>
 pre {
    display: block;
@@ -63,10 +45,21 @@ pre {
    padding-left:50px;
 }
 
+.notecard {
+   color:white;
+   background-color:gray;
+   margin: 2px;
+   padding: 10px;
+   border-radius: 5px;
+   border: solid 2px black;
+}
+
 </style>
+<br/>
+<h1>WebID login report</h1>
+<p>(And see here for a machine-readable <a href="/test/WebIDTest">earl report</a>).</p>
 
 {% for test in webidinfo.testbed.tests %}
-
 {% for result in test.results %}
 
 <div><b class="{% if test.requirement %}req{% else %}case{% endif %}">{{ test.name }}</b> ... <b class="{% if result.passed %}passed{% else %}failed{% endif %}">{% if result.passed %}Passed{% else %}Failed{% endif %}</b>
@@ -76,5 +69,4 @@ pre {
 
 {% endfor %}
 {% endfor %}
-<a href="/test/WebIDTest">RDF report</a>
 {% endblock %}
