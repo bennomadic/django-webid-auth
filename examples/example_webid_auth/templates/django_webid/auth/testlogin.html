@@ -1,21 +1,10 @@
 {% extends "base.html" %}
+{% comment %}
 {% block header %}
 <h1>Congrats!</h1>
 {% endblock %}
+{% endcomment %}
 {% block content %}
-<div class="notecard">
-{% if not user.is_anonymous %}
-<div class="foafpic happy">
-</div>
-<p>Congrats! You are logged in as user <b>{{ user.username }}</b></p>
-{% else %}
-<div class="foafpic sad">
-</div>
-<p>Hmmm... WebID auth failed :(</p>
-{% endif %}
-<p><b>You just {% if not user.is_anonymous %}logged{% else %}tried to log{% endif %} in with this WebID URI:</b></p>
-<p>{{ webidinfo.validatedURI }}</p>
-</div>
 <style>
 pre {
    display: block;
@@ -28,38 +17,21 @@ pre {
    background: #ece9d8;
    padding: 8px;
 }
-
-.passed {
-   color: green;
-}
-
-.failed {
-   color: red;
-}
-
-.warning {
-   color: purple;
-   font-weight:bold;
-}
-
-.req {
-   font-size:120%;
-}
-
-.case {
-   padding-left:50px;
-}
-
+.passed {color: green;}
+.failed {color: red;}
+.warning {color: purple; font-weight:bold;}
+.req {font-size:120%;}
+.case {padding-left:50px;}
 .notecard {
    color:white;
    background-color:gray;
    margin: 2px;
+   margin-top: 20px;
    padding: 10px;
    border-radius: 5px;
    border: solid 2px black;
    height: 120px;
 }
-
 .sad {
    background: url({{ STATIC_URL}}django_webid/auth/images/foaflogo_sad.png) no-repeat;
 }
@@ -75,6 +47,19 @@ pre {
 }
 
 </style>
+<div class="notecard">
+{% if not user.is_anonymous %}
+<div class="foafpic happy">
+</div>
+<p>Congrats! You are logged in as user <b>{{ user.username }}</b></p>
+{% else %}
+<div class="foafpic sad">
+</div>
+<p>Hmmm... WebID auth failed :(</p>
+{% endif %}
+<p><b>You just {% if not user.is_anonymous %}logged{% else %}tried to log{% endif %} in with this WebID URI:</b></p>
+<p>{{ webidinfo.validatedURI }}</p>
+</div>
 <br/>
 {% if not user.is_anonymous %}
 <h2>Now what?</h2>
@@ -83,19 +68,20 @@ pre {
 <p>Use <b>django-webid-auth</b> on your project. Fork this code on github.</p>
 {% else %}
 <h2>What happened here?</h2>
-<p>This endpoint <em><b>thinks</b></em> that your WebID credentials do not match the <a href="http://webid.info/spec">current spec</a>. It might be an error on your side, or also might be an error on this endpoint specification, which is still not very well tested. You can file issues <a href="https://github.com/bennomadic/python-webid/issues">here</a>, our tls-fairies will look at it asap.</p>
+<p>This endpoint <em><b>thinks</b></em> that your WebID credentials do not match the <a href="http://webid.info/spec">current spec</a> (*). It might be an error on your side, or also might be an error on this endpoint specification, which is still not very well tested. You can file issues <a href="https://github.com/bennomadic/python-webid/issues">here</a>, our tls-fairies will look at it asap.</p>
+<p><b>(*) Note:</b> <em>The parts of the spec that we understand</em>. We only parse WebID profiles in <b>rdfa</b> format for now. More coming soon!</p>
 <p>The following report of the validation process might be helpful to debug.<p>
 {% endif %}
 <hr/>
 <h1>WebID login report</h1>
 <p>If you are rolling your own WebID, below you can find some hints about the validation progress. We're using <a href="https://github.com/bennomadic/python-webid/blob/master/src/webid/validator.py">this python-based validator</a>. Bugs? Issues? Need help? <a href="https://github.com/bennomadic/python-webid/issues">Tell us!</a></p>
-<p>(And see here for a machine-readable <a href="/test/WebIDTest">earl report</a>).</p>
+<p>(And see <a href="/test/WebIDTest">here for a machine-readable earl report</a>).</p>
 
 {% for test in webidinfo.testbed.tests %}
 {% for result in test.results %}
 
 <div><b class="{% if test.requirement %}req{% else %}case{% endif %}">{{ test.name }}</b> ... <b class="{% if result.passed %}passed{% else %}failed{% endif %}">{% if result.passed %}Passed{% else %}Failed{% endif %}</b>
-	{% if result.details %}<p {% if not test.requirement %}class="case"{% endif %}>verification timestamp: {{ result.details }}</p>{% endif %}
+	{% if result.details %}<p {% if not test.requirement %}class="case"{% endif %}>{{ result.details }}</p>{% endif %}
 	<p {% if not test.requirement %}class="case"{% endif %}>{% if not test.mandatory and not result.passed %}<span class="warning">WARNING </span>{% endif %}{{ test.description }}</p>
 </div>
 
