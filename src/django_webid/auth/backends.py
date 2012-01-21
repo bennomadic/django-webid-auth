@@ -14,8 +14,7 @@ logger = logging.getLogger(name=__name__)
 
 if settings.DEBUG:
     logger.setLevel(logging.DEBUG)
-
-logger.error('trying to import WebID model')
+logger.debug('trying to import WebID model')
 from django_webid.provider import models
 
 
@@ -28,17 +27,26 @@ class WEBIDAuthBackend:
     instance
     """
     def authenticate(self, request=None):
-        logger.error('AUTHENTICATING:  ')
+        logger.debug('AUTHENTICATING:')
         ssl_info = request.ssl_info
-        logger.debug('ssl_info.cert %s' % ssl_info.cert)
         certstr = ssl_info.__dict__.get('cert', None)
-        logger.error('certstr= %s' % certstr)
-        validator = WebIDValidator(certstr=certstr)
-        validated, data = validator.validate()
-        #passing data in request
-        request.webidinfo = data
+
+        #logger.debug('ssl_info.cert %s' % ssl_info.cert)
+        #logger.debug('certstr= %s' % certstr)
+
+        if not getattr(request, 'webidvalidated', None):
+            validator = WebIDValidator(certstr=certstr)
+            validated, data = validator.validate()
+            #passing data in request
+            request.webidvalidated = True
+            validatedURI = data.validatedURI
+            data._extract_webid_name(validatedURI)
+            request.webidinfo = data
+        else:
+            logger.debug('we had already validated this cert!')
+            validated = True
+
         if validated is True:
-            data._extract_webid_name(data.validatedURI)
             logger.error(
             'OK! ALMOST DONE! SUCCESSFULLY CHECKED WEBID!\
             NOW SHOULD BE AUTHD!')
@@ -65,6 +73,8 @@ class WEBIDAuthBackend:
         #make sure that uri does not exists
         try:
             logger.debug('>>>>>>>>>> getting user by uri = %s' % user_uri)
+            if not uri:
+                return None
             user = models.WebIDUser.get_for_uri(user_uri)
             logger.debug('user is %s' % user)
             return user
@@ -91,12 +101,15 @@ class WEBIDAuthBackend:
         data = request.webidinfo
         #data "now" is ssl_info.
         #XXX make sure that uri does not exists
+        logger.debug('creating user')
         user = self.get_user_from_uri(data.validatedURI)
         if not user:
             if settings_get('WEBDIAUTH_CREATE_USER_CALLBACK'):
                 build_user = settings_get('WEBIDAUTH_CREATE_USER_CALLBACK')
+                #XXX check for callable
             else:
-                logger.error('create user: no callback')
+                logger.error('create user: no callback. building user by \
+                        default.')
                 build_user = self.build_user
             logger.error('calling to build_user')
             user = build_user(request)
@@ -110,8 +123,14 @@ class WEBIDAuthBackend:
         WEBIDAUTH_CREATE_USER_CALLBACK setting.
         """
         logger.debug('>>>>>>>>>>>>>>building user!')
-        user = models.WebIDUser()
         data = request.webidinfo
+        validatedURI = data.validatedURI
+        logger.debug('validatedURI = %s' % validatedURI)
+        if not validatedURI:
+            logger.error('attempt to build an user with no validatedURI! \
+            skipping...')
+            return None
+
         names = data.webid_name
 
         field_name = "name"
@@ -121,7 +140,7 @@ class WEBIDAuthBackend:
             ends_number = re.findall('\S+_(\d+)', name)
             if ends_number:
                 number = int(ends_number[0]) + 1
-                print 'number', number
+                logger.debug('number %s' % number)
                 _name = name.replace('_%s' % ends_number[0], '_%s' %
                         str(number))
                 return _name
@@ -129,7 +148,7 @@ class WEBIDAuthBackend:
                 return u"%s_1" % (name)
 
         #[warning] This is "a bit" hackish:
-        max_tries = 10
+        max_tries = 20
         tries = max_tries
 
         while tries > 0:
@@ -150,7 +169,7 @@ class WEBIDAuthBackend:
             else:
                 break
         else:
-            logger.error('Sorry... Your name is already taken...')
+            logger.error('Sorry... *that* name is already taken...')
             #XXX here we should signal some way of getting
             #user input (a form, or something)
 
@@ -161,17 +180,15 @@ class WEBIDAuthBackend:
         # XXX this assumption is very very weak
         # i.e, make sure to find a proper username if we do not
         # have the nick information.
-
         # Also, handle collisions
         # (better to have, for instance, user@site usernames in the db
         # and have a display-name?)
-        user.username = target_name
+        user = models.WebIDUser.objects.create(username=target_name)
+        useruri = models.WebIDURI.objects.create(uri=validatedURI, user=user)
+        useruri.save()
         logger.error('username set to %s' % names['name'])
-
-        user.uri = data.validatedURI
         user.password = UserManager().make_random_password()
         user.is_active = True
-        logger.error('saving??')
-        #print 'name ', user.username
+        logger.debug('saving WebIDUser with name %s' % target_name)
         user.save()
         return user
