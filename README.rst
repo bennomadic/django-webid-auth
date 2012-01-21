@@ -13,7 +13,7 @@ This django app provides the middleware and the authentication backend needed fo
 
 Installation
 ------------
-1. Add django_webid.auth application to your project INSTALLED_APPS.
+1. Add django_webid.auth and django_webid.provider apps to your project INSTALLED_APPS.
 
 2. Set the WebIDAuthBackend as your AUTHENTICATION_BACKENDS. 
    If you want to be able to use the  username/password
