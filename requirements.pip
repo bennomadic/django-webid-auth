@@ -1,4 +1,4 @@
 Django>=1.3.0
-django-webid-provider>=0.1
+django-webid-provider>=0.1.2
 #-e git://github.com/bennomadic/django-webid-provider.git#egg=django-webid-provider
 -e git://github.com/bennomadic/python-webid.git#egg=python-webid
