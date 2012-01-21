@@ -45,6 +45,13 @@ pre {
    padding-bottom: 20px;
    float:right;
 }
+.rdflogo {
+   height:50px;
+   background: url({{ STATIC_URL}}django_webid/auth/images/rdflogo.gif) no-repeat;
+   padding-left: 50px;
+   padding-top:5px;
+   vertical-align:middle;
+}
 
 </style>
 <div class="notecard">
@@ -58,24 +65,24 @@ pre {
 <p>Hmmm... WebID auth failed :(</p>
 {% endif %}
 <p><b>You just {% if not user.is_anonymous %}logged{% else %}tried to log{% endif %} in with this WebID URI:</b></p>
-<p>{{ webidinfo.validatedURI }}</p>
+<p><b><a href="{{ webidinfo.validatedURI }}">{{ webidinfo.validatedURI }}</a></b></p>
 </div>
 <br/>
 {% if not user.is_anonymous %}
-<h2>Now what?</h2>
-<p>If you're wondering what else can you do with your brand-new <a href="http://webid.info/spec"><b>WebID</b></a>...not much on this site. It was only a litte demo of a little bit of magic. You have to wait for the <a href="">WebID community</a> to deliver some more awesomeness to you... stay tuned!</p>
+<h2>So... now what?</h2>
+<p>If you're wondering what else can you do with your brand-new <a href="http://webid.info/spec"><b>WebID</b></a>... not much on this site. It was only a litte demo of a little bit of magic. You have to wait for the <a href="">WebID community</a> to deliver some more awesomeness to you... stay tuned!</p>
 <h2>A django developer there?</h2>
-<p>Use <b>django-webid-auth</b> on your project. Fork this code on github.</p>
+<p>Or, maybe it's your turn to deliver some awesomeness to the world! We'd love to hear about you using <b>django-webid-auth</b> in your project!. <a href="http://github.com/bennomadic/django-webid-auth">Fork the code</a> on github.</p>
 {% else %}
 <h2>What happened here?</h2>
 <p>This endpoint <em><b>thinks</b></em> that your WebID credentials do not match the <a href="http://webid.info/spec">current spec</a> (*). It might be an error on your side, or also might be an error on this endpoint specification, which is still not very well tested. You can file issues <a href="https://github.com/bennomadic/python-webid/issues">here</a>, our tls-fairies will look at it asap.</p>
 <p><b>(*) Note:</b> <em>The parts of the spec that we understand</em>. We only parse WebID profiles in <b>rdfa</b> format for now. More coming soon!</p>
 <p>The following report of the validation process might be helpful to debug.<p>
 {% endif %}
-<hr/>
+<hr/><br/>
 <h1>WebID login report</h1>
-<p>If you are rolling your own WebID, below you can find some hints about the validation progress. We're using <a href="https://github.com/bennomadic/python-webid/blob/master/src/webid/validator.py">this python-based validator</a>. Bugs? Issues? Need help? <a href="https://github.com/bennomadic/python-webid/issues">Tell us!</a></p>
-<p>(And see <a href="/test/WebIDTest">here for a machine-readable earl report</a>).</p>
+<p>If you are rolling your own WebID, below you can find some hints about the validation process. We're using <a href="https://github.com/bennomadic/python-webid/blob/master/src/webid/validator.py">this python-based validator</a>. Bugs? Issues? Need help? <a href="https://github.com/bennomadic/python-webid/issues">Tell us!</a></p>
+<div class="rdflogo"><p>Are you a semantic machine? We also have <a href="/test/WebIDTest">the report in a format you will enjoy!</a>.</p></div>
 
 {% for test in webidinfo.testbed.tests %}
 {% for result in test.results %}
