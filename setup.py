@@ -31,8 +31,7 @@ setup(
         'requirements': ['%s/*.tar.gz' % VERSION],
     },
     version=VERSION,
-    description="""
-    A django app to enable WebID authentication.'""",
+    description="""A django app to enable WebID authentication.""",
     long_description=long_description,
     author='Ben Carrillo',
     author_email='bennomadic@gmail.com',
