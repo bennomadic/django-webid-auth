@@ -18,7 +18,7 @@ def init():
     """
     Initialize a virtualenv in which to run tests against this
     """
-    local("virtualenv --python=/usr/bin/python2.7 .")
+    local("virtualenv .")
     local("pip install -E . -r ./requirements.pip")
     local("python setup.py sdist")
     local("pip install -E . dist/django_webid.auth-0.1.tar.gz")
