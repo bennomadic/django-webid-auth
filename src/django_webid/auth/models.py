@@ -1,4 +1,7 @@
 from django.db import models
+#nothing here.
+#we're using django-webid-provider models.
+
 #from django.contrib.auth.models import User, UserManager
 
 
