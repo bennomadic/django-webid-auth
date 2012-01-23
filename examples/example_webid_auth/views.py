@@ -17,12 +17,17 @@ def test_login(request):
 
 
 def webidlogin_report(request):
+    if settings.DEBUG:
+        content_type = "text/xml"
+    else:
+        content_type = "application/rdf+xml"
     return render(request,
         'django_webid/auth/webidloginReport.html',
         {'user': request.user,
         'webidinfo': request.webidinfo},
-        #XXX need a switch here.
-        #If settings.DEBUG, set mimetype to xml
-        #(it's easier for me to debug on browser)
-        content_type="text/xml")
-        #content_type="application/rdf+xml")
+        content_type=content_type,
+        )
+
+def tryme(request):
+    return render_to_response('django_webid/auth/tryme.html',
+            {'STATIC_URL': settings.STATIC_URL})
