@@ -38,12 +38,12 @@ class WEBIDAuthMiddleware(object):
         user = WEBIDAuthBackend().authenticate(
                 request=request) or AnonymousUser()
         logger.error('first auth: now user is %s' % user)
-        print 'NO USER. NEXT STEP, CREATE IT'
-        logger.error('validated? %s' % request.webidvalidated)
-        logger.error('create user? %s' % settings.WEBIDAUTH_CREATE_USER)
+        logger.warning('NO USER. Attempting to create one')
+        logger.debug('validated? %s' % request.webidvalidated)
+        logger.debug('create user? %s' % settings.WEBIDAUTH_CREATE_USER)
 
         #XXX check ssl_info.verify ??
-        logger.error(settings.WEBIDAUTH_CREATE_USER)
+        logger.debug(settings.WEBIDAUTH_CREATE_USER)
         if request.webidvalidated and not user.is_authenticated() and \
                 settings_get('WEBIDAUTH_CREATE_USER'):
             logger.debug('Validated. Trying to create user.')
@@ -54,7 +54,7 @@ class WEBIDAuthMiddleware(object):
                 user = WEBIDAuthBackend().authenticate(
                         request=request) or AnonymousUser()
 
-        logger.error('final check. now user is %s' % user)
+        logger.debug('final check. now user is %s' % user)
         if user.is_authenticated() and USE_COOKIE:
             login(request, user)
         else:
