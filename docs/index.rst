@@ -3,16 +3,26 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Django WebIDAuth App
-====================
+Django WebIDAuth
+================
 
-Hello, documented world!
+Introduction
+------------
+**TBD**
 
-Contents:
+Getting Started
+---------------
+
+Configuration
+-------------
+See :ref:`ref-config` for the settings keys that you can customize.
+
+Contributing
+------------
+**TBD**
 
 .. toctree::
    :maxdepth: 2
-
 
 
 Indices and tables
