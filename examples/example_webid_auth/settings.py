@@ -60,11 +60,17 @@ MIDDLEWARE_CLASSES = (
     'django_webid.auth.middleware.WEBIDAuthMiddleware'
 )
 
+#
+# WebID-Auth Specific Settings
+#
+
 WEBIDAUTH_CREATE_USER = True
+WEBIDAUTH_CREATE_USER_CALLBACK = None
+WEBIDAUTH_WEBIDURI_CALLBACK = None
+WEBIDAUTH_LOGIN_URL = None
 WEBIDAUTH_USE_COOKIE = False
 
 ROOT_URLCONF = 'example_webid_auth.urls'
-
 
 INSTALLED_APPS = (
     'django.contrib.auth',
