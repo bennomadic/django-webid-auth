@@ -13,9 +13,16 @@ Introduction
 Getting Started
 ---------------
 
+Installation
+------------
+
 Configuration
 -------------
-See :ref:`ref-config` for the settings keys that you can customize.
+See the :ref:`ref-config` section for the settings keys that you can customize.
+
+Running tests
+-------------
+**TBD**
 
 Contributing
 ------------
