@@ -14,6 +14,7 @@ logger = logging.getLogger(name=__name__)
 
 if settings.DEBUG:
     logger.setLevel(logging.DEBUG)
+
 logger.debug('trying to import WebID model')
 from django_webid.provider import models
 
@@ -38,7 +39,8 @@ class WEBIDAuthBackend:
             validator = WebIDValidator(certstr=certstr)
             validated, data = validator.validate()
             #passing data in request
-            request.webidvalidated = True
+            #request.webidvalidated = True
+            request.webidvalidated = validated
             validatedURI = data.validatedURI
             data._extract_webid_name(validatedURI)
             request.webidinfo = data
@@ -47,7 +49,7 @@ class WEBIDAuthBackend:
             validated = True
 
         if validated is True:
-            logger.error(
+            logger.debug(
             'OK! ALMOST DONE! SUCCESSFULLY CHECKED WEBID!\
             NOW SHOULD BE AUTHD!')
             user = self.get_user_from_uri(request.webidinfo.validatedURI)
@@ -104,29 +106,35 @@ class WEBIDAuthBackend:
         logger.debug('creating user')
         user = self.get_user_from_uri(data.validatedURI)
         if not user:
-            if settings_get('WEBDIAUTH_CREATE_USER_CALLBACK'):
-                build_user = settings_get('WEBIDAUTH_CREATE_USER_CALLBACK')
-                #XXX check for callable
+            #XXX enclose in a try block
+            build_user_cb = settings_get('WEBIDAUTH_CREATE_USER_CALLBACK')
+            if build_user_cb:
+                if not callable(build_user_cb):
+                    logger.warning('The provided build_user callback is not a\
+callable function. Using default build function.')
+                    build_user_cb = None
             else:
-                logger.error('create user: no callback. building user by \
-                        default.')
-                build_user = self.build_user
-            logger.error('calling to build_user')
-            user = build_user(request)
+                logger.debug('create user: no callback. Using default build \
+function.')
+            if not build_user_cb:
+                build_user_cb = self.build_user
+            logger.debug('calling to build_user callback')
+            user = build_user_cb(request)
         return user
 
     def build_user(self, request=None):
         """
         create a valid (and stored) django user to be associated with
-        the authenticated WebID URI. This method can be "overwritten"
-        by using the
-        WEBIDAUTH_CREATE_USER_CALLBACK setting.
+        the authenticated WebID URI. This method will be used if no alternative
+        is provided in the settings.WEBIDAUTH_CREATE_USER_CALLBACK value, or if
+        the value there is not a valid function.
         """
         logger.debug('>>>>>>>>>>>>>>building user!')
         data = request.webidinfo
         validatedURI = data.validatedURI
         logger.debug('validatedURI = %s' % validatedURI)
         if not validatedURI:
+            #XXX this check should be moved to "create_user" function
             logger.error('attempt to build an user with no validatedURI! \
             skipping...')
             return None
@@ -163,13 +171,12 @@ class WEBIDAuthBackend:
             #print 'all ', WebIDUser.objects.all()
 
             if colliding_users.count() > 0:
-                #print ('oops... name taken')
                 target_name = augment_name(target_name)
                 tries -= 1
             else:
                 break
         else:
-            logger.error('Sorry... *that* name is already taken...')
+            logger.warning('Sorry... *that* name is already taken...')
             #XXX here we should signal some way of getting
             #user input (a form, or something)
 
