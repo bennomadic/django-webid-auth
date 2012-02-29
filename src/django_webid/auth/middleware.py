@@ -8,7 +8,7 @@ from django.contrib.auth import get_user
 from django.contrib.auth.models import AnonymousUser
 from django.conf import settings
 
-from util import SSLInfo, settings_get
+from util import SSLInfo
 
 logger = logging.getLogger(name=__name__)
 
@@ -18,39 +18,51 @@ class WEBIDAuthMiddleware(object):
     attempts to find a valid user based on the client certificate info
     """
     def process_request(self, request):
-        USE_COOKIE = settings_get('WEBIDAUTH_USE_COOKIE')
-        #@TODO implement cookies
+        CREATE_USER = getattr(settings, "WEBIDAUTH_CREATE_USER", True)
+        USE_COOKIE = getattr(settings, 'WEBIDAUTH_USE_COOKIE', False)
+        logger.debug('use cookie? %s' % USE_COOKIE)
+
         if USE_COOKIE:
-            #WTF??
             request.user = get_user(request)
             if request.user.is_authenticated():
-                logging.error('>>>>>>>>>>>> YOUR COOKIE SAYS: \
-                        YOU ARE ALRDY AUTHD!')
+                logging.debug('ALREADY AUTHENTICATED (by cookie)!')
                 return
 
-        #logging.error("WEBIDAuthMiddleware: about to construct sslinfo")
+        #logging.debug("WEBIDAuthMiddleware: about to construct sslinfo")
         request.ssl_info = SSLInfo(request)
         logging.debug("calling to authenticate user (on middleware)")
         user = WEBIDAuthBackend().authenticate(
                 request=request) or AnonymousUser()
-        logger.debug('first auth: now user is %s' % user)
-        logger.warning('NO USER. Attempting to create one')
+
+        logger.debug('first auth attempt: now user is %s' % user)
         logger.debug('validated? %s' % request.webidvalidated)
-        logger.debug('create user? %s' % settings.WEBIDAUTH_CREATE_USER)
-        #XXX check ssl_info.verify ??
-        logger.debug(settings.WEBIDAUTH_CREATE_USER)
-        if request.webidvalidated and not user.is_authenticated() and \
-                settings_get('WEBIDAUTH_CREATE_USER'):
-            logger.info('Validated. Trying to create user.')
-        #if not user.is_authenticated() and \
-        #   settings_get('WEBIDAUTH_CREATE_USER'):
-            created = WEBIDAuthBackend().create_user(request=request)
-            if created:
-                user = WEBIDAuthBackend().authenticate(
-                        request=request) or AnonymousUser()
+
+        if request.webidvalidated and not user.is_authenticated():
+            logger.debug('create user? %s' % CREATE_USER)
+            if not isinstance(CREATE_USER, bool):
+                logger.debug('WEBID_CREATE_USER was not bool')
+                if callable(CREATE_USER):
+                    logger.debug('calling CREATE_USER function with \
+webidvalidated arg')
+                    CREATE_USER = CREATE_USER(request.webidvalidated)
+
+            if CREATE_USER is True:
+                logger.info('Trying to create user per setting.')
+                created = WEBIDAuthBackend().create_user(request=request)
+                if created:
+                    user = WEBIDAuthBackend().authenticate(
+                            request=request) or AnonymousUser()
+                else:
+                    logger.warning('User creation failed.')
+
+            if CREATE_USER is False:
+                logger.debug('not creating user, per setting.')
 
         logger.debug('final check. now user is %s' % user)
+
         if user.is_authenticated() and USE_COOKIE:
+            logger.debug('authenticated and USE_COOKIE')
             login(request, user)
         else:
+            logger.debug('not authenticated or not cookie')
             request.user = user

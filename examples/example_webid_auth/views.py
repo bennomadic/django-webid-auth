@@ -10,7 +10,7 @@ from django.conf import settings
 def test_login(request):
     return render_to_response('django_webid/auth/testlogin.html', {
         'user': request.user,
-        'webidinfo': request.webidinfo,
+        'webidinfo': getattr(request, 'webidinfo', None),
         'STATIC_URL': settings.STATIC_URL,
         'MEDIA_URL': settings.MEDIA_URL,
         })

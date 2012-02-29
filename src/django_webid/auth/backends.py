@@ -2,11 +2,10 @@ import logging
 import re
 
 from django.db import transaction
-#from django.conf import settings
+from django.conf import settings
 from django.contrib.auth.models import UserManager
 
-from util import settings_get
-
+#from util import settings_get
 from webid.validator import WebIDValidator
 #XXX problems with this import???!
 from django_webid.provider import models
@@ -49,9 +48,14 @@ class WEBIDAuthBackend:
             user = self.get_user_from_uri(request.webidinfo.validatedURI)
             if user:
                 logger.debug('yeah! we got an user')
+                user.backend = 'django_webid.auth.backends.WebIDAuthBackend'
+                # Annotate the user object with the path of the
+                # backend.
+                user.backend = "%s.%s" % (self.__module__,
+                               self.__class__.__name__)
                 return user
             else:
-                logger.debug('>>>>>>> no user :( ')
+                logger.debug('>>> no user :( ')
                 return None
         else:
             #XXX this logic is wrong.
@@ -68,14 +72,14 @@ class WEBIDAuthBackend:
         user_uri = uri
         #make sure that uri does not exists
         try:
-            logger.debug('>>>>>>>>>> getting user by uri = %s' % user_uri)
+            logger.debug('>>> getting user by uri = %s' % user_uri)
             if not uri:
                 return None
             user = models.WebIDUser.get_for_uri(user_uri)
             logger.debug('user is %s' % user)
             return user
         except models.WebIDUser.DoesNotExist:
-            logger.debug('>>>>>>>>>> that user doesnot exists :(')
+            logger.debug('>>> that user does not exists :(')
             return None
 
     def get_user(self, user_id):
@@ -96,13 +100,15 @@ class WEBIDAuthBackend:
         """
         data = request.webidinfo
         #data "now" is ssl_info.
-        #XXX make sure that uri does not exists
+        #TODO make sure that this WebIDURI indeed does not exists
         logger.debug('creating user')
         user = self.get_user_from_uri(data.validatedURI)
         if not user:
             #XXX enclose in a try block
-            build_user_cb = settings_get('WEBIDAUTH_CREATE_USER_CALLBACK')
+            build_user_cb = getattr(settings,
+                    'WEBIDAUTH_CREATE_USER_CALLBACK', None)
             if build_user_cb:
+                #XXX we should check also that it accepts an argument.
                 if not callable(build_user_cb):
                     logger.warning('The provided build_user callback is not a\
 callable function. Using default build function.')
@@ -123,14 +129,14 @@ function.')
         is provided in the settings.WEBIDAUTH_CREATE_USER_CALLBACK value, or if
         the value there is not a valid function.
         """
-        logger.debug('>>>>>>>>>>>>>>building user!')
+        logger.debug('building user!')
         data = request.webidinfo
         validatedURI = data.validatedURI
         logger.debug('validatedURI = %s' % validatedURI)
         if not validatedURI:
             #XXX this check should be moved to "create_user" function
             logger.error('attempt to build an user with no validatedURI! \
-            skipping...')
+skipping...')
             return None
 
         names = data.webid_name
@@ -174,10 +180,6 @@ function.')
             #XXX here we should signal some way of getting
             #user input (a form, or something)
 
-        # what the fuckt is this get('key', None) ??
-        # I think I was too sleepy when I wrote this
-        #if names.has_key('name') and names.get('key', None):
-
         # XXX this assumption is very very weak
         # i.e, make sure to find a proper username if we do not
         # have the nick information.
@@ -187,7 +189,7 @@ function.')
         user = models.WebIDUser.objects.create(username=target_name)
         useruri = models.WebIDURI.objects.create(uri=validatedURI, user=user)
         useruri.save()
-        logger.error('username set to %s' % names['name'])
+        logger.info('username set to %s' % names['name'])
         user.password = UserManager().make_random_password()
         user.is_active = True
         logger.debug('saving WebIDUser with name %s' % target_name)
