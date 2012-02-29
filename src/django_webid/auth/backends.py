@@ -2,21 +2,16 @@ import logging
 import re
 
 from django.db import transaction
-from django.conf import settings
+#from django.conf import settings
 from django.contrib.auth.models import UserManager
 
 from util import settings_get
 
 from webid.validator import WebIDValidator
 #XXX problems with this import???!
+from django_webid.provider import models
 
 logger = logging.getLogger(name=__name__)
-
-if settings.DEBUG:
-    logger.setLevel(logging.DEBUG)
-
-logger.debug('trying to import WebID model')
-from django_webid.provider import models
 
 
 class WEBIDAuthBackend:
@@ -28,7 +23,6 @@ class WEBIDAuthBackend:
     instance
     """
     def authenticate(self, request=None):
-        logger.debug('AUTHENTICATING:')
         ssl_info = request.ssl_info
         certstr = ssl_info.__dict__.get('cert', None)
 
@@ -36,6 +30,7 @@ class WEBIDAuthBackend:
         #logger.debug('certstr= %s' % certstr)
 
         if not getattr(request, 'webidvalidated', None):
+            logger.debug('about to validate client cert')
             validator = WebIDValidator(certstr=certstr)
             validated, data = validator.validate()
             #passing data in request
@@ -50,11 +45,10 @@ class WEBIDAuthBackend:
 
         if validated is True:
             logger.debug(
-            'OK! ALMOST DONE! SUCCESSFULLY CHECKED WEBID!\
-            NOW SHOULD BE AUTHD!')
+            '[OK] PASSED WEBID! NOW SHOULD BE AUTHD!')
             user = self.get_user_from_uri(request.webidinfo.validatedURI)
             if user:
-                logger.debug('>>>>>>>> yeah! we got an user')
+                logger.debug('yeah! we got an user')
                 return user
             else:
                 logger.debug('>>>>>>> no user :( ')

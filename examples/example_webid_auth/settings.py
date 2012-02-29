@@ -82,6 +82,55 @@ INSTALLED_APPS = (
     'django_webid.auth'
 )
 
+# Sample Logging Config.
+# Split into settings_local_example
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': {
+            #'format': '[%(levelname)s] %(asctime)s %(module)s %(process)d %(thread)d %(message)s'},
+            'format': '[%(levelname)s] [%(module)s] (%(process)d, %(thread)d): %(message)s'},
+        'simple': {
+            'format': '[%(levelname)s] %(message)s'},
+    },
+    'handlers': {
+        'null': {
+            'level': 'DEBUG',
+            'class': 'django.utils.log.NullHandler',
+    },
+        'console': {
+            'formatter': 'simple',
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler'
+        },
+        'v-console': {
+            'formatter': 'verbose',
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['null'],
+            'propagate': True,
+            'level': 'INFO',
+    },
+        'django_webid.auth': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'webid': {
+            'handlers': ['v-console'],
+            'level': 'INFO',
+            'propagate': False,
+        }
+    }
+}
+
+
 try:
     from settings_local import *
 except ImportError:

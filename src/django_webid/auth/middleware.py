@@ -10,11 +10,7 @@ from django.conf import settings
 
 from util import SSLInfo, settings_get
 
-
 logger = logging.getLogger(name=__name__)
-if settings.DEBUG:
-    logger.error('setting level to DEBUG')
-    logger.setLevel(logging.DEBUG)
 
 
 class WEBIDAuthMiddleware(object):
@@ -37,16 +33,15 @@ class WEBIDAuthMiddleware(object):
         logging.debug("calling to authenticate user (on middleware)")
         user = WEBIDAuthBackend().authenticate(
                 request=request) or AnonymousUser()
-        logger.error('first auth: now user is %s' % user)
+        logger.debug('first auth: now user is %s' % user)
         logger.warning('NO USER. Attempting to create one')
         logger.debug('validated? %s' % request.webidvalidated)
         logger.debug('create user? %s' % settings.WEBIDAUTH_CREATE_USER)
-
         #XXX check ssl_info.verify ??
         logger.debug(settings.WEBIDAUTH_CREATE_USER)
         if request.webidvalidated and not user.is_authenticated() and \
                 settings_get('WEBIDAUTH_CREATE_USER'):
-            logger.debug('Validated. Trying to create user.')
+            logger.info('Validated. Trying to create user.')
         #if not user.is_authenticated() and \
         #   settings_get('WEBIDAUTH_CREATE_USER'):
             created = WEBIDAuthBackend().create_user(request=request)
