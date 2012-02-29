@@ -2,30 +2,39 @@
    sphinx-quickstart on Thu Jan 19 04:01:59 2012.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
-
+================
 Django WebIDAuth
 ================
 
+.. rubric:: WebID Authentication for the django framework.
+
 Introduction
-------------
+============
 **TBD**
 
 Getting Started
----------------
+===============
 
 Installation
-------------
+============
 
 Configuration
--------------
-See the :ref:`ref-config` section for the settings keys that you can customize.
+=============
+Here you will find a quick list of the minimal settings needed to get going.
+
+
+:doc:`Full list of settings <ref/settings>`
+
+:ref:`ref-config`. (deprecated)
+
+See the section :ref:`ref-deployment` for deployment hints.
 
 Running tests
--------------
+=============
 **TBD**
 
 Contributing
-------------
+============
 **TBD**
 
 .. toctree::
