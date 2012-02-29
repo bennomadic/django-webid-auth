@@ -23,9 +23,13 @@ class WEBIDAuthMiddleware(object):
         logger.debug('use cookie? %s' % USE_COOKIE)
 
         if USE_COOKIE:
+            #XXX we could get a parameter for ignoring (expiring)
+            #the current user.
+            #We could use that, for instance, for forcing the WebIDvalidation
+            #report on a testlogin page.
             request.user = get_user(request)
             if request.user.is_authenticated():
-                logging.debug('ALREADY AUTHENTICATED (by cookie)!')
+                logger.debug('ALREADY AUTHENTICATED (by cookie)!')
                 return
 
         #logging.debug("WEBIDAuthMiddleware: about to construct sslinfo")
