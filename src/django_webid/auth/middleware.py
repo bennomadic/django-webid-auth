@@ -20,7 +20,45 @@ class WEBIDAuthMiddleware(object):
     def process_request(self, request):
         CREATE_USER = getattr(settings, "WEBIDAUTH_CREATE_USER", True)
         USE_COOKIE = getattr(settings, 'WEBIDAUTH_USE_COOKIE', False)
+
+        EXCLUDE_ADMIN = getattr(settings, "WEBIDAUTH_EXCLUDE_ADMIN", True)
+        EXCLUDE_STATIC = getattr(settings, "WEBIDAUTH_EXCLUDE_STATIC", True)
+        EXCLUDE_MEDIA = getattr(settings, "WEBIDAUTH_EXCLUDE_MEDIA", True)
+        EXCLUDE_PATH = getattr(settings, "WEBIDAUTH_EXCLUDE_PATH", None)
+
+        toexclude = set([])
+
+        if EXCLUDE_ADMIN:
+            #XXX get proper admin URL setting
+            adminurl = getattr(settings, "ADMIN_URL", "/admin/")
+            toexclude.add(adminurl)
+
+        if EXCLUDE_STATIC:
+            staticurl = getattr(settings, "STATIC_URL", None)
+            if staticurl:
+                toexclude.add(staticurl)
+
+        if EXCLUDE_MEDIA:
+            mediaurl = getattr(settings, "MEDIA_URL", None)
+            if mediaurl:
+                toexclude.add(mediaurl)
+
+        if EXCLUDE_PATH:
+            if isinstance(EXCLUDE_PATH, list):
+                for path in EXCLUDE_PATH:
+                    toexclude.add(path)
+            if isinstance(EXCLUDE_PATH, str):
+                toexclude.add(EXCLUDE_PATH)
+
+        #NON_WEBID_PATHS = ('/admin/', '/static/', '/media/')
+        for path in toexclude:
+            if request.path.startswith(path):
+                return
+
+        logger.debug('not skipping:%s' % request.path)
         logger.debug('use cookie? %s' % USE_COOKIE)
+        logger.debug('')
+        logger.debug('checking url path: %s' % request.path)
 
         if USE_COOKIE:
             #XXX we could get a parameter for ignoring (expiring)
