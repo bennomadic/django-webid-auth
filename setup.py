@@ -17,12 +17,12 @@ VERSION = __version__
 setup_root = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(setup_root, "src"))
 
-long_description = "A django app to enabled WebID authentication."
+long_description = "A django app to enable WebID authentication."
 
 
 packages = find_packages('src')
 setup(
-    name='django_webid.auth',
+    name='django-webid-auth',
     package_dir={'': 'src'},
     packages=packages,
     namespace_packages=['django_webid'],
