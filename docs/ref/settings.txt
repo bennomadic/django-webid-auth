@@ -21,6 +21,8 @@ Here's a full list of all available settings, and their default values.
 AUTH_PROFILE_MODULE
 -------------------
 
+*TODO: Move to Quick Setup, not an specific setting...*
+
 Default: Not defined.
 
 As specified in the django docs, the site-specific user profile model used by your site.
@@ -43,7 +45,8 @@ Note that the default behaviour means that, **unless you change the default sett
 WEBIDAUTH_CREATE_USER_CALLBACK 
 ------------------------------
 
-Default: ``WebIDAuthBackend.build_user`` method. 
+Default: None.
+Fallsback to ``WebIDAuthBackend.build_user`` method. 
 
 The function that will be executed when creating a new user.
 
@@ -61,36 +64,55 @@ Take into account that your user building callback **SHOULD** create instances o
         user.save()
         return user
 
+WEBIDAUTH_USERNAME_SPARQL
+-------------------------
 
-WEBIDAUTH_WEBIDURI_CALLBACK
----------------------------
-*(not implemented yet)*
+Default: ``None``
 
-This function will be called during the cert creation process, in order to gather the info needed to write the final WebID URI(s) that will go in the subjectAltName field in the certificate.
+Fallsback to ``constants.NAME_SPARQL`` string.
 
-Implementation details still unclear, but several open possibilities:
+A custom ``SPARQL`` query that will be used to retrieve fields from the remote user WebID profile, from where we will get info for building a username.
 
-* Callback is called with some documented context as argument.
-
-* Callback returns the final string
-
-* Doubt: what is the notation for several URIS?
-
-* Instead of a callable, we can pass a string with an named urlpattern
-
-  * (*will need also some convention re. what context element are passed and how*).
-
-  * (*this is related also to the still unresolved CN field FK issue*)
-
-Note that, if we go the uri list path... or even in the str one... we DO NOT need to prepend the "URI:" prefix. Code takes care of adding it.
-       
-Cookies
--------
-**WEBIDAUTH_USE_COOKIE** *(not implemented yet)*
+WEBIDAUTH_USE_COOKIE
+--------------------
 
 Default: ``False``
 
-Boolean. If True, a session cookie will be used in further requests until it expires.
+Boolean. If ``True``, a session cookie will be used in further requests until it expires. When set to ``True``, the user cert will no longer will be checked until session expiry.
+
+You might want to set also the ``SESSION_COOKIE_HTTPONLY`` and ``SESSION_COOKIE_SECURE`` settings values to ``True``.
+
+WEBIDAUTH_EXCLUDE_ADMIN
+-----------------------
+
+Default: ``True``
+
+If True, it excludes admin path from WebID authentication.
+
+WEBIDAUTH_EXCLUDE_STATIC
+------------------------
+
+Default: ``True``
+
+If True, it excludes static path from WebID authentication.
+
+
+WEBIDAUTH_EXCLUDE_MEDIA
+-----------------------
+
+Default: ``True``
+
+If True, it excludes media path from WebID authentication.
+
+
+WEBIDAUTH_EXCLUDE_PATH
+----------------------
+
+Default: ``None``
+
+Expects a ``tuple`` of strings with any extra paths that should be excluded from WebID authentication. The path is excluded when a match is found, so any child node will be also excluded.
+
+**This will also interact in some way with the modal configuration of the WebIDAuth**
 
 Misc
 ----
@@ -104,7 +126,7 @@ Might help with the Safari bug.
 
 It could be quite useful for defining several tries (for the needed / optional / password fallbacks) and instructing user / or even redirecting agent to another try.
 
-* How this interacts with the similar login_url django setting???
+* How this interacts with the similar ``LOGIN_URL`` and similar django settings???
 
 
 **WEBIDAUTH_AUTH_FALLBACK** *(not implemented yet)*
