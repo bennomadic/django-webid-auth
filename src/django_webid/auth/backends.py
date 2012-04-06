@@ -1,11 +1,11 @@
 import logging
 import re
 
-from django.db import transaction
 from django.conf import settings
 from django.contrib.auth.models import UserManager
+from django.db import transaction
 
-#from util import settings_get
+from util import settings_get
 from webid.validator import WebIDValidator
 #XXX problems with this import???!
 from django_webid.provider import models
@@ -26,17 +26,30 @@ class WEBIDAuthBackend:
         certstr = ssl_info.__dict__.get('cert', None)
 
         #logger.debug('ssl_info.cert %s' % ssl_info.cert)
-        #logger.debug('certstr= %s' % certstr)
+        logger.debug('certstr= %s' % certstr)
 
         if not getattr(request, 'webidvalidated', None):
             logger.debug('about to validate client cert')
             validator = WebIDValidator(certstr=certstr)
             validated, data = validator.validate()
-            #passing data in request
-            #request.webidvalidated = True
             request.webidvalidated = validated
             validatedURI = data.validatedURI
-            data._extract_webid_name(validatedURI)
+
+            custom_query = getattr(settings,
+                    "WEBIDAUTH_USERNAME_SPARQL",
+                    None)
+
+            #FIXME !!!
+            #If no results with custom query, we could
+            #try some fallbacks... we need something for
+            #building the username...
+            #or we can ask user to choose a visible name
+            #if we could not retrieve anything useful.
+
+            data._extract_webid_name(validatedURI,
+                    sparql_query=custom_query)
+
+            #passing data in request
             request.webidinfo = data
         else:
             logger.debug('we had already validated this cert!')
@@ -115,7 +128,7 @@ callable function. Using default build function.')
                     build_user_cb = None
             else:
                 logger.debug('create user: no callback. Using default build \
-function.')
+function. Sup.')
             if not build_user_cb:
                 build_user_cb = self.build_user
             logger.debug('calling to build_user callback')

@@ -51,7 +51,7 @@ TEMPLATE_LOADERS = (
 
 AUTHENTICATION_BACKENDS = (
         'django.contrib.auth.backends.ModelBackend',
-        'django_webid_auth.backends.WEBIDAuthBackend',
+        'django_webid.auth.backends.WEBIDAuthBackend',
 )
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -65,9 +65,27 @@ MIDDLEWARE_CLASSES = (
 #
 
 WEBIDAUTH_CREATE_USER = True
-WEBIDAUTH_CREATE_USER_CALLBACK = None
+
+def createusercb(req):
+    from build_user import build_custom_user
+    return build_custom_user(req)
+
+# FIXME use lambda here.
+WEBIDAUTH_CREATE_USER_CALLBACK = createusercb
 WEBIDAUTH_USE_COOKIE = True
 WEBIDAUTH_LOGIN_URL = None
+
+WEBIDAUTH_USERNAME_SPARQL = """
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT ?uri ?givenName ?familyName
+WHERE {
+  ?uri foaf:givenName ?givenName .
+   OPTIONAL {
+      ?uri foaf:familyName ?familyName .
+   }
+}
+"""
 
 ROOT_URLCONF = 'example_webid_auth.urls'
 
