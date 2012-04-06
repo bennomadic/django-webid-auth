@@ -73,6 +73,12 @@ Fallsback to ``constants.NAME_SPARQL`` string.
 
 A custom ``SPARQL`` query that will be used to retrieve fields from the remote user WebID profile, from where we will get info for building a username.
 
+WEBIDAUTH_USERNAME_VARS
+-----------------------
+Default: None
+
+A tuple containing the strings for the vars returned by the above sparql.
+
 WEBIDAUTH_USE_COOKIE
 --------------------
 

@@ -38,6 +38,12 @@ class WEBIDAuthBackend:
             custom_query = getattr(settings,
                     "WEBIDAUTH_USERNAME_SPARQL",
                     None)
+            #XXX FIXME document this.
+            #Or better, make both settings together
+            #as a dict...
+            custom_vars = getattr(settings,
+                    "WEBIDAUTH_USERNAME_VARS",
+                    None)
 
             #FIXME !!!
             #If no results with custom query, we could
@@ -47,7 +53,8 @@ class WEBIDAuthBackend:
             #if we could not retrieve anything useful.
 
             data._extract_webid_name(validatedURI,
-                    sparql_query=custom_query)
+                    sparql_query=custom_query,
+                    sparql_vars=custom_vars)
 
             #passing data in request
             request.webidinfo = data

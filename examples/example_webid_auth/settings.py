@@ -86,6 +86,7 @@ WHERE {
    }
 }
 """
+WEBIDAUTH_USERNAME_VARS = ('uri', 'givenName', 'familyName')
 
 ROOT_URLCONF = 'example_webid_auth.urls'
 
