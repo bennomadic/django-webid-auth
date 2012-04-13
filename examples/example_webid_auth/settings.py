@@ -51,7 +51,7 @@ TEMPLATE_LOADERS = (
 
 AUTHENTICATION_BACKENDS = (
         'django.contrib.auth.backends.ModelBackend',
-        'django_webid_auth.backends.WEBIDAuthBackend',
+        'django_webid.auth.backends.WEBIDAuthBackend',
 )
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -60,11 +60,35 @@ MIDDLEWARE_CLASSES = (
     'django_webid.auth.middleware.WEBIDAuthMiddleware'
 )
 
+#
+# WebID-Auth Specific Settings
+#
+
 WEBIDAUTH_CREATE_USER = True
-WEBIDAUTH_USE_COOKIE = False
+
+def createusercb(req):
+    from build_user import build_custom_user
+    return build_custom_user(req)
+
+# FIXME use lambda here.
+WEBIDAUTH_CREATE_USER_CALLBACK = createusercb
+WEBIDAUTH_USE_COOKIE = True
+WEBIDAUTH_LOGIN_URL = None
+
+WEBIDAUTH_USERNAME_SPARQL = """
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT ?uri ?givenName ?familyName
+WHERE {
+  ?uri foaf:givenName ?givenName .
+   OPTIONAL {
+      ?uri foaf:familyName ?familyName .
+   }
+}
+"""
+WEBIDAUTH_USERNAME_VARS = ('uri', 'givenName', 'familyName')
 
 ROOT_URLCONF = 'example_webid_auth.urls'
-
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -75,6 +99,55 @@ INSTALLED_APPS = (
     'django_webid.provider',
     'django_webid.auth'
 )
+
+# Sample Logging Config.
+# Split into settings_local_example
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': {
+            #'format': '[%(levelname)s] %(asctime)s %(module)s %(process)d %(thread)d %(message)s'},
+            'format': '[%(levelname)s] [%(module)s] (%(process)d, %(thread)d): %(message)s'},
+        'simple': {
+            'format': '[%(levelname)s] %(message)s'},
+    },
+    'handlers': {
+        'null': {
+            'level': 'DEBUG',
+            'class': 'django.utils.log.NullHandler',
+    },
+        'console': {
+            'formatter': 'simple',
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler'
+        },
+        'v-console': {
+            'formatter': 'verbose',
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['null'],
+            'propagate': True,
+            'level': 'INFO',
+    },
+        'django_webid.auth': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'webid': {
+            'handlers': ['v-console'],
+            'level': 'INFO',
+            'propagate': False,
+        }
+    }
+}
+
 
 try:
     from settings_local import *

@@ -1,0 +1,150 @@
+.. _ref-config:
+
+=============
+configuration
+=============
+
+Minimal config
+==============
+*Some brief example with the minimal things needed to get going*
+
+Settings reference
+==================
+These are all the settings entries that you might want to change, and their default values.
+
+**The info below is just a stub for the design phase, therefore it is  subject to changes. It is mostly used as a requirements doc at the moment, so don't trust it too much...**
+
+Profile
+-------
+**AUTH_PROFILE_MODULE** 
+
+As specified in the django docs, you will have to set this to the module handling your profiles.
+
+For a sample application, you can use ...
+
+**Is this strictly needed???**
+
+User creation
+-------------
+**WEBIDAUTH_CREATE_USER** *(default = True)*.
+
+Tells if a new user will be created after a successful authentication, when there is no local instance for that user.
+
+It can be a boolean (*default: True*) or a callable that returns a boolean (which can be used to implement rules for new user creation) *(callable not implemented yet)*
+
+**WEBIDAUTH_CREATE_USER_CALLBACK** 
+
+A function that will be executed when creating a new user.
+
+It will get the WebID validation object as argument.
+
+As a default, if you are using ... the method ... foo ... will be called if no callback is provided.
+
+WebID URI
+---------
+**WEBIDAUTH_WEBIDURI_CALLBACK** *(not implemented yet)*
+
+This function will be called during the cert creation process, in order to gather the info needed to write the final WebID URI(s) that will go in the subjectAltName field in the certificate.
+
+Implementation details still unclear, but several open possibilities:
+
+* Callback is called with some documented context as argument.
+
+* Callback returns the final string
+
+* Doubt: what is the notation for several URIS?
+
+* Instead of a callable, we can pass a string with an named urlpattern
+
+  * (*will need also some convention re. what context element are passed and how*).
+
+  * (*this is related also to the still unresolved CN field FK issue*)
+
+Note that, if we go the uri list path... or even in the str one... we DO NOT need to prepend the "URI:" prefix. Code takes care of adding it.
+       
+Cookies
+-------
+**WEBIDAUTH_USE_COOKIE** *(not implemented yet)*
+
+Boolean. If True, a session cookie will be used in further requests until it expires.
+
+Misc
+----
+*Not sure if all of them are worth implementing. Just documenting them here to consider all the cases.*
+
+**WEBIDAUTH_LOGIN_URL** *(not implemented yet)*
+
+Similar to the webiduri callback: it expects a list/tuple of urlpatterns.
+
+Might help with the Safari bug.
+
+It could be quite useful for defining several tries (for the needed / optional / password fallbacks) and instructing user / or even redirecting agent to another try.
+
+* How this interacts with the similar login_url django setting???
+
+
+**WEBIDAUTH_AUTH_FALLBACK** *(not implemented yet)*
+
+Several options (strings?) to be taken after a failed WebID authentication.
+
+It *could* be related to the login_url tuple.
+
+We could do something like this:
+
+* try the want-cert auth path (works for some browsers)
+
+* if failed, try the need-cert path *(see apache section below)*.
+
+* if failed, try to redirect to regular user/pass?
+
+* only for some sections?
+
+
+**WEBIDAUTH_AJAX_LOGIN** *(not implemented yet)*
+
+We could use this setting to enable henry's workaround for safari bug.
+
+**WEBIDAUTH_EXTEND_HTTPS_AUTH** *(not implemented yet)*
+
+I see two options for webid auth:
+
+* Once it is authenticated, cookie (if cookies enabled) allows access to http-only sections (that are @loggedin only tho)
+
+* If strict (and no password fallback?), we do not allow cookie authentication for non-https pages.
+
+* This setting could control a @webidlogin decorator...
+
+
+**WEBIDAUTH_WEBID_OVER_HTTPS** *(not implemented yet)*
+
+This might not be needed finally if we delegate that responsibility to the WEBIDAUTH_WEBIDURI_CALLBACK, but I thought it could simplify things a little bit (specially if we are using the webid profile pattern that we pack with django-webid-provider). Could be bool, or could be ('no', 'optional', 'force') options:
+
+* If no, just URI http://
+
+* If optional, might be sthing like https://...webiduri... , http://...sameuri
+
+* If force: just make sure we have the httpS://prefixed uri...
+
+Might work as a switch, for reusing the same webidauth callback (it interacts with that one in the sense that it is called from inside there, or it modifies / double checks its output.
+
+External apps
+=============
+**Cuddlybuddy**
+
+We could use (configuring ourselves, automagically) or ask-the-developer-to-use (ugh...) this app.
+http://pypi.python.org/pypi/django-cuddlybuddly-ssl/1.0.1
+
+*A Django app that provides middleware to redirect views to and from https and http.*
+
+
+Apache config
+=============
+**TBD**
+
+Twisted
+=======
+**TBD**
+
+Nginx
+=====
+Not working yet :(

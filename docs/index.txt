@@ -1,0 +1,97 @@
+.. django-webid-auth documentation master file, created by
+   sphinx-quickstart on Thu Jan 19 04:01:59 2012.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+================
+Django WebIDAuth
+================
+
+.. rubric:: WebID Authentication for the django framework.
+
+Introduction
+============
+**TBD**
+
+Getting Started
+===============
+
+Installation
+============
+You can install the package from pypi::
+
+  pip install django-webid-auth
+
+Or download from the git repo::
+
+  git clone https://bennomadic@github.com/bennomadic/django-webid-auth.git
+
+.. warning::
+
+  I have not been able to get the pip editable sources working with the git repo of the package in a requirements file. I believe it has to do with the namespace package and the egg linking when executing setup.py develop. For now, I'm using this workaround for setting the dev environment with the git repo. If you know a solution, please send a patch :)
+
+To install from repo in the virtualenv (see warning above)::
+
+  python setup.py sdist
+  pip install -E . django-webid-auth-0.1.tar.gz
+
+Configuration
+=============
+The minimal settings needed to get going could be something along these lines:
+
+1. Add ``django_webid.auth`` and ``django_webid.provider`` apps to your project **INSTALLED_APPS**.
+
+2. Set the ``WebIDAuthBackend`` in your **AUTHENTICATION_BACKENDS** tuple. 
+
+Keep the ``ModelBackend`` if you want to be able to use the username/password::
+
+   AUTHENTICATION_BACKENDS = (
+        'django.contrib.auth.backends.ModelBackend',
+        'django_webid.auth.backends.WebIDAuthBackend',
+   )
+
+3. Add the ``WebIDAuthMiddleware`` to your **MIDDLEWARE_CLASSES**.
+
+You can leave out AuthenticationMiddleware::
+
+   MIDDLEWARE_CLASSES = (
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django_webid.auth.middleware.WebIDAuthMiddleware',
+   )
+   
+4. Run a ./manage syncdb to populate models.
+
+5. Configure your web server to ask client for a certificate on your chosen location (see Apache configuration section). And make sure that the chosen location is served under https (using a rewrite rule, for instace).
+
+A sample config could look like this::
+
+   <Location /accounts/webidauth>
+     SSLVerifyClient optional_no_ca
+     SSLOptions +ExportCertData
+   </Location>
+
+:doc:`Full list of settings <ref/settings>`
+
+:ref:`ref-config`. (deprecated)
+
+See the section :ref:`ref-deployment` for deployment hints.
+
+Running tests
+=============
+**TBD**
+
+Contributing
+============
+**TBD**
+
+.. toctree::
+   :maxdepth: 2
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+

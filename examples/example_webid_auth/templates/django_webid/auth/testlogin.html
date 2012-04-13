@@ -65,7 +65,11 @@ pre {
 <p>Hmmm... WebID auth failed :(</p>
 {% endif %}
 <p><b>You just {% if not user.is_anonymous %}logged{% else %}tried to log{% endif %} in with this WebID URI:</b></p>
+{% if webidinfo %}
 <p><b><a href="{{ webidinfo.validatedURI }}">{{ webidinfo.validatedURI }}</a></b></p>
+{% else %}
+[No info here, we're using cookies. Remove your sessionid cookie]
+{% endif %}
 </div>
 <br/>
 {% if not user.is_anonymous %}
@@ -81,6 +85,11 @@ pre {
 {% endif %}
 <hr/><br/>
 <h1>WebID login report</h1>
+
+{% if not webidinfo %}
+<p>No login details here. Seems that we're using cookies and you had been previously authenticated. Try removing your "sessionid" cookie and try again if you really want that info.</p>
+
+{% else %}
 <p>If you are rolling your own WebID, below you can find some hints about the validation process. We're using <a href="https://github.com/bennomadic/python-webid/blob/master/src/webid/validator.py">this python-based validator</a>. Bugs? Issues? Need help? <a href="https://github.com/bennomadic/python-webid/issues">Tell us!</a></p>
 <div class="rdflogo"><p>Are you a semantic machine? We also have <a href="/test/WebIDTest">the report in a format you will enjoy!</a>.</p></div>
 
@@ -94,4 +103,5 @@ pre {
 
 {% endfor %}
 {% endfor %}
+{% endif %}
 {% endblock %}

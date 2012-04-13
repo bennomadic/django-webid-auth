@@ -1,0 +1,202 @@
+=============
+Settings
+=============
+
+.. contents::
+        :local:
+        :depth: 1
+
+.. warning::
+
+   The info below is just a stub for the design phase, therefore it is  subject to changes. It is mostly used as a requirements doc at the moment, so don't trust it too much...
+
+Available settings
+==================
+
+Here's a full list of all available settings, and their default values.
+
+
+.. setting:: AUTH_PROFILE_MODULE
+
+AUTH_PROFILE_MODULE
+-------------------
+
+*TODO: Move to Quick Setup, not an specific setting...*
+
+Default: Not defined.
+
+As specified in the django docs, the site-specific user profile model used by your site.
+
+For a sample application, you can use ``...``
+
+**Is this strictly needed???**
+
+WEBIDAUTH_CREATE_USER 
+---------------------
+
+Default = ``True``
+
+Tells if a new user will be created after a successful authentication, when there is no local instance for that user.
+
+It can be a boolean, or a callable that must return a boolean (which can be used to implement rules for new user creation). The callable function is passed the validated WebID URI as the only argument.
+
+Note that the default behaviour means that, **unless you change the default setting, any user with a valid WebID will be allowed to be authenticated on your site.**
+
+WEBIDAUTH_CREATE_USER_CALLBACK 
+------------------------------
+
+Default: None.
+Fallsback to ``WebIDAuthBackend.build_user`` method. 
+
+The function that will be executed when creating a new user.
+
+It will get the ``request`` object passed as a keyword argument. Note that from there the function can access the validation object: ``request.webidinfo``
+
+Take into account that your user building callback **SHOULD** create instances of ``django_webid.provider.models.WebIDUser`` and ``.WebIDURI`` models. The provided default user-building function, apart of briefly trying to avoid name collisions (by augmenting username if already taken), is creating users like this::
+
+        user = provider.models.WebIDUser.objects.create(username=target_name)
+        useruri = provider.models.WebIDURI.objects.create(uri=validatedURI, user=user)
+        useruri.save()
+        logger.error('username set to %s' % names['name'])
+        user.password = UserManager().make_random_password()
+        user.is_active = True
+        logger.debug('saving WebIDUser with name %s' % target_name)
+        user.save()
+        return user
+
+WEBIDAUTH_USERNAME_SPARQL
+-------------------------
+
+Default: ``None``
+
+Fallsback to ``constants.NAME_SPARQL`` string.
+
+A custom ``SPARQL`` query that will be used to retrieve fields from the remote user WebID profile, from where we will get info for building a username.
+
+WEBIDAUTH_USERNAME_VARS
+-----------------------
+Default: None
+
+A tuple containing the strings for the vars returned by the above sparql.
+
+WEBIDAUTH_USE_COOKIE
+--------------------
+
+Default: ``False``
+
+Boolean. If ``True``, a session cookie will be used in further requests until it expires. When set to ``True``, the user cert will no longer will be checked until session expiry.
+
+You might want to set also the ``SESSION_COOKIE_HTTPONLY`` and ``SESSION_COOKIE_SECURE`` settings values to ``True``.
+
+WEBIDAUTH_EXCLUDE_ADMIN
+-----------------------
+
+Default: ``True``
+
+If True, it excludes admin path from WebID authentication.
+
+WEBIDAUTH_EXCLUDE_STATIC
+------------------------
+
+Default: ``True``
+
+If True, it excludes static path from WebID authentication.
+
+
+WEBIDAUTH_EXCLUDE_MEDIA
+-----------------------
+
+Default: ``True``
+
+If True, it excludes media path from WebID authentication.
+
+
+WEBIDAUTH_EXCLUDE_PATH
+----------------------
+
+Default: ``None``
+
+Expects a ``tuple`` of strings with any extra paths that should be excluded from WebID authentication. The path is excluded when a match is found, so any child node will be also excluded.
+
+**This will also interact in some way with the modal configuration of the WebIDAuth**
+
+Misc
+----
+*Not sure if all of them are worth implementing. Just documenting them here to consider all the cases.*
+
+**WEBIDAUTH_LOGIN_URL** *(not implemented yet)*
+
+Similar to the webiduri callback: it expects a list/tuple of urlpatterns.
+
+Might help with the Safari bug.
+
+It could be quite useful for defining several tries (for the needed / optional / password fallbacks) and instructing user / or even redirecting agent to another try.
+
+* How this interacts with the similar ``LOGIN_URL`` and similar django settings???
+
+
+**WEBIDAUTH_AUTH_FALLBACK** *(not implemented yet)*
+
+Several options (strings?) to be taken after a failed WebID authentication.
+
+It *could* be related to the login_url tuple.
+
+We could do something like this:
+
+* try the want-cert auth path (works for some browsers)
+
+* if failed, try the need-cert path *(see apache section below)*.
+
+* if failed, try to redirect to regular user/pass?
+
+* only for some sections?
+
+
+**WEBIDAUTH_AJAX_LOGIN** *(not implemented yet)*
+
+We could use this setting to enable henry's workaround for safari bug.
+
+**WEBIDAUTH_EXTEND_HTTPS_AUTH** *(not implemented yet)*
+
+I see two options for webid auth:
+
+* Once it is authenticated, cookie (if cookies enabled) allows access to http-only sections (that are @loggedin only tho)
+
+* If strict (and no password fallback?), we do not allow cookie authentication for non-https pages.
+
+* This setting could control a @webidlogin decorator...
+
+
+**WEBIDAUTH_WEBID_OVER_HTTPS** *(not implemented yet)*
+
+This might not be needed finally if we delegate that responsibility to the WEBIDAUTH_WEBIDURI_CALLBACK, but I thought it could simplify things a little bit (specially if we are using the webid profile pattern that we pack with django-webid-provider). Could be bool, or could be ('no', 'optional', 'force') options:
+
+* If no, just URI http://
+
+* If optional, might be sthing like https://...webiduri... , http://...sameuri
+
+* If force: just make sure we have the httpS://prefixed uri...
+
+Might work as a switch, for reusing the same webidauth callback (it interacts with that one in the sense that it is called from inside there, or it modifies / double checks its output.
+
+External apps
+=============
+**Cuddlybuddy**
+
+We could use (configuring ourselves, automagically) or ask-the-developer-to-use (ugh...) this app.
+http://pypi.python.org/pypi/django-cuddlybuddly-ssl/1.0.1
+
+*A Django app that provides middleware to redirect views to and from https and http.*
+
+
+Apache config
+=============
+**TBD**
+
+Twisted
+=======
+**TBD**
+
+Nginx
+=====
+Not working yet :(

@@ -17,12 +17,12 @@ VERSION = __version__
 setup_root = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(setup_root, "src"))
 
-long_description = "A django app to enabled WebID authentication."
+long_description = "A django app to enable WebID authentication."
 
 
 packages = find_packages('src')
 setup(
-    name='django_webid.auth',
+    name='django-webid-auth',
     package_dir={'': 'src'},
     packages=packages,
     namespace_packages=['django_webid'],
@@ -36,11 +36,13 @@ setup(
     author='Ben Carrillo',
     author_email='bennomadic@gmail.com',
     download_url='https://github.com/bennomadic/django-webid-auth.git',
+    install_requires=['django-webid-provider>=0.2'],
+    #XXX how to mark dependencies from git?
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: GPL License',
+        'License :: OSI Approved :: GNU General Public License (GPL)',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: JavaScript',
@@ -48,8 +50,6 @@ setup(
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    #XXX how to mark dependencies from git?
-    install_requires=["django-webid-provider",],
     #test_requires=[],
     keywords='foaf, ssl, webid, x509, certificate, client certificate,\
     authentication, authorization, django',
