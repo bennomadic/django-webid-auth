@@ -36,6 +36,8 @@ setup(
     author='Ben Carrillo',
     author_email='bennomadic@gmail.com',
     download_url='https://github.com/bennomadic/django-webid-auth.git',
+    install_requires=['django-webid-provider>=0.2'],
+    #XXX how to mark dependencies from git?
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Web Environment',
@@ -48,8 +50,6 @@ setup(
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    #XXX how to mark dependencies from git?
-    install_requires=["django-webid-provider",],
     #test_requires=[],
     keywords='foaf, ssl, webid, x509, certificate, client certificate,\
     authentication, authorization, django',
